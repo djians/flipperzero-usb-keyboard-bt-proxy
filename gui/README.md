@@ -78,3 +78,12 @@ Otherwise,
 4. Enable bluetooth on your computer.
 5. Run `f0-usb-keyboard-bt-proxy --device-bt-name="UsbKbBtP <F0 name>"`.
 6. Now you can type in the opened window, and it will, hopefully, work.
+
+## Safety-gated clipboard crash cart
+
+The optional [`crashcart`](../crashcart) client adds a Windows-first two-step
+clipboard workflow for long recovery commands. It works with this repository's
+FAP and the maintained Android KB Bridge FAP, stages and previews text with
+`Ctrl+Shift+F`, sends only after `Ctrl+Shift+G`, blocks multiline input, and
+never transmits Enter/Return. See its README for installation, validation, and
+safety guidance.
