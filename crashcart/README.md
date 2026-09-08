@@ -14,9 +14,12 @@ key-down/key-up events. It does **not** send Enter.
 
 - `Ctrl+Shift+F` stages and previews the clipboard.
 - `Ctrl+Shift+G` sends the staged text.
-- `Ctrl+Shift+X` cancels it.
+- `Ctrl+Shift+X` cancels unsent staged text. It cannot stop a transmission that
+  is already in progress.
 - Newlines, carriage returns, empty text, unsupported Unicode, and oversized
   payloads are rejected.
+- The default command limit is 160 characters, and the stage preview is never
+  truncated.
 - The target computer never receives Enter/Return from this program. Read the
   target screen and press Enter on a physical keyboard only after verification.
 - Use only with devices you own or are authorized to service.

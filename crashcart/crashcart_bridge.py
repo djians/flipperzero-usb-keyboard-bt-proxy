@@ -253,11 +253,10 @@ def text_fingerprint(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()[:12]
 
 
-def render_preview(text: str, *, width: int = 160) -> str:
-    escaped = text.replace("\t", "\\t")
-    if len(escaped) <= width:
-        return escaped
-    return f"{escaped[: width - 1]}…"
+def render_preview(text: str) -> str:
+    """Render every staged character; safety review must never be truncated."""
+
+    return text.replace("\t", "\\t")
 
 
 def event_bytes(
@@ -589,7 +588,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="BLE frame protocol (default: detect known characteristic UUID)",
     )
     parser.add_argument("--scan-timeout", type=float, default=30.0)
-    parser.add_argument("--max-characters", type=int, default=2000)
+    parser.add_argument("--max-characters", type=int, default=160)
     parser.add_argument("--key-down-ms", type=float, default=60.0)
     parser.add_argument("--key-gap-ms", type=float, default=90.0)
     parser.add_argument("--checkpoint-every", type=int, default=8)

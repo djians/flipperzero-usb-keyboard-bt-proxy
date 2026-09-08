@@ -5,6 +5,7 @@ from crashcart_bridge import (
     BridgeProtocol,
     Timing,
     event_bytes,
+    render_preview,
     send_text_events,
     text_fingerprint,
     validate_text,
@@ -53,6 +54,10 @@ class ValidateTextTests(unittest.TestCase):
 
     def test_fingerprint_is_repeatable(self) -> None:
         self.assertEqual(text_fingerprint("abc"), "ba7816bf8f01")
+
+    def test_preview_is_never_truncated(self) -> None:
+        text = "x" * 500
+        self.assertEqual(render_preview(text), text)
 
 
 class EventTests(unittest.IsolatedAsyncioTestCase):
