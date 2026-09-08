@@ -128,6 +128,9 @@ prefix and recognizes either known GATT characteristic.
    `Ctrl+Shift+G`.
 4. Compare the target text character-for-character. Do not proceed unless it is
    exact on three consecutive trials.
+5. In the harmless text field, start sending a long repeated-letter test and
+   close the Flipper app mid-send. Confirm transmission stops, the target does
+   not keep repeating a held key, and the client warns that the line is partial.
 
 If characters drop, increase the pacing:
 
@@ -198,5 +201,7 @@ The current recommended FAP/protocol is from
 Its documented protocol releases all keys on BLE disconnect and uses the
 Flipper Serial service. The original firmware and GUI in this fork are from
 [tzoiker/flipperzero-usb-keyboard-bt-proxy](https://github.com/tzoiker/flipperzero-usb-keyboard-bt-proxy)
-under the MIT License. This crash-cart client is an additive workflow for that
-project and retains the upstream license and attribution.
+under the MIT License. Its older FAP path is retained for compatibility but is
+not the recommended setup and still requires a firmware-matched build and its
+own hardware validation. This crash-cart client is an additive workflow for
+that project and retains the upstream license and attribution.

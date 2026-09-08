@@ -408,13 +408,6 @@ class FlipperConnection:
             raise RuntimeError(
                 f"Requested GATT characteristic {self.characteristic_uuid} was not found"
             )
-        if self.requested_protocol is not BridgeProtocol.AUTO and len(writable) == 1:
-            LOG.warning(
-                "Expected characteristic UUID was absent; using the only writable "
-                "characteristic: %s",
-                writable[0].uuid,
-            )
-            return writable[0], self.requested_protocol
         if not writable:
             raise RuntimeError(
                 "No write-without-response GATT characteristic was found"
@@ -473,6 +466,14 @@ class FlipperConnection:
                     self.active_protocol,
                 )
             except Exception as error:
+                try:
+                    # A failure can occur after key-down but before key-up.
+                    # Disconnect so the FAP can release its complete HID state.
+                    await self.disconnect()
+                except Exception:
+                    LOG.exception(
+                        "BLE disconnect after transmission failure also failed"
+                    )
                 raise RuntimeError(
                     "Transmission stopped. The target may contain a partial command; "
                     "do not press Enter. Clear the target line, restart the Flipper app "

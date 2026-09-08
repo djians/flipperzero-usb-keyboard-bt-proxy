@@ -134,6 +134,11 @@ static void bt_connection_status_changed_callback(BtStatus status, void* context
     UNUSED(context);
 
     const bool connected = (status == BtStatusConnected);
+    // A disconnect can occur after key-down but before key-up. Clear the USB
+    // HID state so the target cannot be left with a held key or modifier.
+    if(!connected) {
+        furi_hal_hid_kb_release_all();
+    }
     notification_internal_message(
         g_app->notifications, connected ? &sequence_set_blue_255 : &sequence_reset_blue);
     with_view_model(

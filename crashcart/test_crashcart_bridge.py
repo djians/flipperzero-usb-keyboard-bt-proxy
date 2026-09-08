@@ -1,8 +1,10 @@
 import unittest
+from types import SimpleNamespace
 
 from crashcart_bridge import (
     ASCII_HID,
     BridgeProtocol,
+    FlipperConnection,
     Timing,
     event_bytes,
     render_preview,
@@ -131,6 +133,60 @@ class EventTests(unittest.IsolatedAsyncioTestCase):
             [data for _characteristic, data, _response in writer.writes],
             [b"\xfb\x4b\x03\x01\x02\x04", b"\xfb\x4b\x03\x02\x02\x04"],
         )
+
+
+class ConnectionSafetyTests(unittest.IsolatedAsyncioTestCase):
+    def make_connection(self) -> FlipperConnection:
+        return FlipperConnection(
+            device_name="Flipper Test",
+            name_prefix="Flipper",
+            scan_timeout=1,
+            characteristic_uuid=None,
+            protocol=BridgeProtocol.ANDROID_KB,
+        )
+
+    def test_unknown_writable_characteristic_fails_closed(self) -> None:
+        connection = self.make_connection()
+        characteristic = SimpleNamespace(
+            uuid="00000000-0000-0000-0000-000000000001",
+            properties=["write-without-response"],
+        )
+        connection.client = SimpleNamespace(
+            services=[SimpleNamespace(characteristics=[characteristic])]
+        )  # type: ignore[assignment]
+
+        with self.assertRaisesRegex(RuntimeError, "Expected Android KB Bridge"):
+            connection._select_characteristic()
+
+    async def test_send_failure_forces_disconnect(self) -> None:
+        connection = self.make_connection()
+
+        class FailingClient:
+            is_connected = True
+            disconnected = False
+
+            async def write_gatt_char(self, *_args, **_kwargs) -> None:
+                raise OSError("simulated BLE loss")
+
+            async def disconnect(self) -> None:
+                self.disconnected = True
+                self.is_connected = False
+
+        client = FailingClient()
+
+        async def fake_connect() -> None:
+            connection.client = client  # type: ignore[assignment]
+            connection.characteristic = object()  # type: ignore[assignment]
+            connection.active_protocol = BridgeProtocol.ANDROID_KB
+
+        connection.connect = fake_connect  # type: ignore[method-assign]
+
+        with self.assertRaisesRegex(RuntimeError, "target may contain a partial"):
+            await connection.send(
+                "a",
+                Timing(0, 0, checkpoint_every=8, checkpoint_seconds=0),
+            )
+        self.assertTrue(client.disconnected)
 
 
 if __name__ == "__main__":
